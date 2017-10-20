@@ -101,9 +101,7 @@ controller.hears(['^reminder$'], 'direct_message,direct_mention', function(bot, 
         bot.api.conversations.open({ users: el, return_im: true }
         , function (err, res) {
 
-            message = { type: 'message', user: res.channel.user, channel: res.channel.id }
-
-            bot.reply(message, {
+            bot.reply({type: 'message', user: res.channel.user, channel: res.channel.id}, {
                 "attachments": [
                     {
                         "fallback": "Pleading kitten",
@@ -112,7 +110,7 @@ controller.hears(['^reminder$'], 'direct_message,direct_mention', function(bot, 
                 ]
             });
 
-            bot.startConversation(message, function (err, convo) {
+            bot.startConversation({type: 'message', user: res.channel.user, channel: res.channel.id}, function (err, convo) {
                 convo.ask('*Hello ' + global_users[el] +  ', it is time for your report ! Do you want to enter your tasks ?*'
                 , [
                 {
@@ -143,11 +141,11 @@ controller.hears(['^reminder$'], 'direct_message,direct_mention', function(bot, 
 
                 convo.on('end', function(convo) {
                     if (convo.status == 'completed') {
-                        bot.reply(message, 'Great ! Please go ahead.');
-                        bot.reply(message, 'Usage:\n```\ntodo <description>\ndoing <task_id>\ndone <task_id>\nlist\nclear```')
+                        bot.reply({type: 'message', user: res.channel.user, channel: res.channel.id}, 'Great ! Please go ahead.');
+                        bot.reply({type: 'message', user: res.channel.user, channel: res.channel.id}, 'Usage:\n```\ntodo <description>\ndoing <task_id>\ndone <task_id>\nlist\nclear```')
                     } else {
                         // this happens if the conversation ended prematurely for some reason
-                        bot.reply(message, 'OK, i\'ll remind you later!');
+                        bot.reply({type: 'message', user: res.channel.user, channel: res.channel.id}, 'OK, i\'ll remind you later!');
                     }
                 });
             });
