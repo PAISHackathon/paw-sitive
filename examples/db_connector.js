@@ -45,7 +45,7 @@ var prepareWorker = function(db){
                 callback(result);
               });
         },
-        findByDateRange: function(startDate, endDate, userId){
+        findByDateRange: function(startDate, endDate, userId, callback){
             collection.find({
                         date: {$gte: startDate.setHours(0,0,0,0) }, 
                         date: {$lte: endDate.setHours(0,0,0,0)},
@@ -53,6 +53,7 @@ var prepareWorker = function(db){
                     .toArray(function(err, result) {
                 if (err) throw err;
                 console.log(result);
+                callback(result);
               });
         },
         updateStatus: function(taskId, newStatus){

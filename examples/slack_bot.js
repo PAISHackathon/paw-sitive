@@ -71,6 +71,7 @@ if (!process.env.token) {
 
 var Botkit = require('../lib/Botkit.js');
 var os = require('os');
+var request = require("request");
 var dbConnector = require('./db_connector.js');
 
 var controller = Botkit.slackbot({
@@ -81,7 +82,7 @@ var bot = controller.spawn({
     token: process.env.token
 }).startRTM();
 
-var global_users = { /*'U7N256YMU': 'Anton' */ , 'U7M5DH64A': 'Olive', 'U7LKX79G9': 'Manvi', 'U7M5G9E3U': 'Thomas' };
+var global_users = { /*'U7N256YMU': 'Anton' */ 'U7M5DH64A': 'Olive', 'U7LKX79G9': 'Manvi', 'U7M5G9E3U': 'Thomas' };
 
 var tasks = [];
 
@@ -111,7 +112,7 @@ controller.hears(['^reminder$'], 'direct_message,direct_mention', function(bot, 
             });
 
             bot.startConversation({type: 'message', user: res.channel.user, channel: res.channel.id}, function (err, convo) {
-                convo.task.timeLimit = 3000
+                convo.task.timeLimit = 10000
                 convo.ask('*Hello ' + global_users[el] +  ', it is time for your report ! Do you want to enter your tasks ?*'
                 , [
                 {
@@ -153,6 +154,18 @@ controller.hears(['^reminder$'], 'direct_message,direct_mention', function(bot, 
         });
     });
 });
+
+controller.hears(['^knock knock$'], 'direct_message,direct_mention,mention' , function(bot, message) {
+    bot.startConversation(
+        message
+        , function(err, convo) {
+            convo.ask( 'knock knock who?'
+                , function(res, convo) {
+                convo.say(res.text + ' pawhpwahphaw!')
+                convo.next()
+            });
+    });
+ });
 
 controller.hears(['what is my name', 'who am i'], 'direct_message,direct_mention,mention', function (bot, message) {
 
@@ -280,11 +293,22 @@ controller.hears(['done (.*)', 'finished (.*)', 'pending (.*)', 'ongoing (.*)',
     bot.reply(message, 'Got it. We saved: \n```\n' + JSON.stringify(task, null, 2) + '\n```');
 });
 
+function getMonday(d)
+{
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay() + 1);
+}
+
+function getFriday(d)
+{
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay() + 5);
+}
+
 controller.hears(['start', 'get', 'list'], 'direct_message,direct_mention,mention', function (bot, message) {
     // TODO: Replace this with getting from storage
     dbConnector('mongodb://localhost:27017/slackdb', function(worker){
-        worker.findByDate(new Date(), message.user, function(data){
-            if (data) {
+        
+        worker.findByDateRange(getMonday(new Date()), getFriday(new Date()), message.user, function(data){
+            if (data.length > 0) {
                 tasks = data;
                 var str = '';
                 var result = groupBy(data, 'status');
@@ -296,7 +320,32 @@ controller.hears(['start', 'get', 'list'], 'direct_message,direct_mention,mentio
                   });
                 });
                 console.log(str);
-                bot.reply(message, 'Your tasks are: \n```\n' + str + '\n```');
+                bot.reply(message, 'Your tasks for this week: \n```\n' + str + '\n```');
+            } else {
+                bot.reply(message, 'No tasks ');
+            }
+        });
+    });
+});
+
+controller.hears(['today'], 'direct_message,direct_mention,mention', function (bot, message) {
+    // TODO: Replace this with getting from storage
+    dbConnector('mongodb://localhost:27017/slackdb', function(worker){
+        
+        worker.findByDate(new Date(), message.user, function(data){
+            if (data.length > 0) {
+                tasks = data;
+                var str = '';
+                var result = groupBy(data, 'status');
+                Object.keys(result).forEach(function(key){
+                    str += key;
+                  str += '\n';
+                  result[key].forEach(function(item){
+                      str += '\t' + item.task.description + '\n';
+                  });
+                });
+                console.log(str);
+                bot.reply(message, 'Your tasks for today: \n```\n' + str + '\n```');
             } else {
                 bot.reply(message, 'No tasks ');
             }
@@ -325,6 +374,40 @@ controller.hears(['clear'], 'direct_message,direct_mention,mention', function (b
     // TODO: Replace this with clearing the storage
     tasks = [];
     bot.reply(message, 'Tasks are cleared.');
+});
+
+controller.hears(['gif me', 'gif me up', 'puppy', 'puppy power'], 'direct_message,direct_mention,mention', function (bot, message) {
+    request("http://api.giphy.com/v1/gifs/search?q=puppy&api_key=dc6zaTOxFJmzC", function (error, response, body){
+        var data = JSON.parse(body);
+  
+        var max = data.data.length;
+        var min = 0;
+  
+        var randomNumber = Math.floor(Math.random() * (max - min)) + min;
+  
+        gifUrl = data.data[randomNumber].images.downsized.url;
+  
+        replyMessage = "Here's a puppy!!! \n" + gifUrl;
+  
+        bot.reply(message, replyMessage);
+      });
+});
+
+controller.hears(['meow'], 'direct_message,direct_mention,mention', function (bot, message) {
+    request("http://api.giphy.com/v1/gifs/search?q=kitten&api_key=dc6zaTOxFJmzC", function (error, response, body){
+        var data = JSON.parse(body);
+  
+        var max = data.data.length;
+        var min = 0;
+  
+        var randomNumber = Math.floor(Math.random() * (max - min)) + min;
+  
+        gifUrl = data.data[randomNumber].images.downsized.url;
+  
+        replyMessage = "Here's a kitten!!! \n" + gifUrl;
+  
+        bot.reply(message, replyMessage);
+      });
 });
 
 controller.hears(['^shutdown$'], 'direct_message,direct_mention,mention', function(bot, message) {
@@ -359,7 +442,7 @@ controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', funct
     bot.api.reactions.add({
         timestamp: message.ts,
         channel: message.channel,
-        name: 'robot_face',
+        name: 'cat',
     }, function (err, res) {
         if (err) {
             bot.botkit.log('Failed to add emoji reaction :(', err);
@@ -390,6 +473,18 @@ controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_men
         });
     });
 });
+
+controller.hears(['^beer$'], 'direct_message,direct_mention,mention' , function(bot, message) {
+    bot.startConversation(
+        message
+        , function(err, convo) {
+            convo.ask( 'Beer is not the question , Beer is the answer!'
+                , function(res, convo) {
+                convo.say('paw-5!')
+                convo.next()
+            });
+    });
+ });
 
 controller.hears(['^coffee$'], 'direct_message,direct_mention,mention' , function(bot, message) {
     bot.startConversation(
