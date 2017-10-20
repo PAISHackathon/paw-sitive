@@ -332,6 +332,27 @@ controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_men
     });
 });
 
+  controller.hears(['coffee'], function(bot, message) {
+    bot.startConversation({
+    user: U7LKX79G9,
+    channel: U7LKX79G9,
+    text: 'How are you feeling today?'
+    }, function(err, convo) {
+        convo.ask({
+        channel: U7LKX79G9,
+        text: 'How are you feeling today?'
+        }, function(res, convo) {
+        convo.say(res.text + ' pawsome!')
+        convo.next()
+    }
+);
+});
+});
+
+controller.hears(['^spaghetti$'], function(bot, message) {
+	bot.whisper(message, {as_user: false, text: 'I may be a humble App, but I too love a good noodle'});
+});
+
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'],
     'direct_message,direct_mention,mention', function(bot, message) {
 
