@@ -108,7 +108,7 @@ controller.hears(['reminder'], 'direct_message,direct_mention', function(bot, me
     });
 });
 
-controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', function(bot, message) {
+controller.hears(['hello', 'hi', 'there?', 'der?', 'hey'], 'direct_message,direct_mention,mention', function(bot, message) {
 
     bot.api.reactions.add({
         timestamp: message.ts,
@@ -129,6 +129,26 @@ controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', funct
         }
     });
 });
+
+controller.hears(['coffee'], function(bot, message) {
+    bot.startConversation({
+    user: U7M5DH64A,
+    channel: U7M5DH64A,
+    text: 'How are you feeling today?'
+    }, function(err, convo) {
+        convo.ask({
+        channel: U7M5DH64A,
+        text: 'How are you feeling today?'
+        }, function(res, convo) {
+        convo.say(res.text + ' pawsome!')
+        convo.next()
+    }
+);
+})
+
+controller.hears(['^spaghetti$'], function(bot, message) {
+	bot.whisper(message, {as_user: false, text: 'I may be a humble App, but I too love a good noodle'});
+})
 
 controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
     var name = message.match[1];
