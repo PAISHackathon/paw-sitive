@@ -88,10 +88,9 @@ controller.hears(['reminder'], 'direct_message,direct_mention', function(bot, me
         bot.api.conversations.open({ users: el , return_im: true}
             ,function(err, res) {
 
-            channel_id = res.channel.id;
-            user_id = res.channel.user;
+            message = {type: 'message' , user: res.channel.user , channel: res.channel.id}
 
-            bot.startConversation({type: 'message' , user: user_id , channel: channel_id}, function(err, convo) {
+            bot.startConversation(message , function(err, convo) {
                 convo.ask('*Hello ' + users[el] +  ', it is 4PM ! Do you want to enter your tasks ?*'
                     /* + '\nhttp://38.media.tumblr.com/d42f40555947c0b955ffbfc6f73fe8ce/tumblr_nwn2jnP3Pl1ucw7ggo1_400.gif' */ , [
                     {
@@ -99,50 +98,40 @@ controller.hears(['reminder'], 'direct_message,direct_mention', function(bot, me
                         callback: function(response, convo) {
                             convo.next()
                         }
+                    },
+                    {
+                        pattern: 'no',
+                        callback: function(response, convo) {
+                            convo.stop()
+                        }
+                    },
+                    {
+                        pattern: 'snooze',
+                        callback: function(response, convo) {
+                            convo.stop()
+                        }
+                    },
+                    {
+                        default: true,
+                        callback: function(response, convo) {
+                            convo.repeat();
+                            convo.next();
+                        }
                     }
                 ]);
 
-                convo.say('Great ! Please go ahead.');
-                convo.say('Usage:\n```\ntodo <description>\ndoing <task_id>\ndone <task_id>\nlist\nclear```');
+                convo.on('end', function(convo) {
+                    if (convo.status == 'completed') {
+                        bot.reply(message, 'Great ! Please go ahead.');
+                        bot.reply(message, 'Usage:\n```\ntodo <description>\ndoing <task_id>\ndone <task_id>\nlist\nclear```')
+                    } else {
+                        // this happens if the conversation ended prematurely for some reason
+                        bot.reply(message, 'OK, i\'ll remind you later!');
+                    }
+                });
+
             });
 
-        });
-    });
-});
-
-controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', function(bot, message) {
-
-    bot.api.reactions.add({
-        timestamp: message.ts,
-        channel: message.channel,
-        name: 'robot_face',
-    }, function(err, res) {
-        if (err) {
-            bot.botkit.log('Failed to add emoji reaction :(', err);
-        }
-    });
-
-
-    controller.storage.users.get(message.user, function(err, user) {
-        if (user && user.name) {
-            bot.reply(message, 'Hello ' + user.name + '!!');
-        } else {
-            bot.reply(message, 'Hello.');
-        }
-    });
-});
-
-controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
-    var name = message.match[1];
-    controller.storage.users.get(message.user, function(err, user) {
-        if (!user) {
-            user = {
-                id: message.user,
-            };
-        }
-        user.name = name;
-        controller.storage.users.save(user, function(err, id) {
-            bot.reply(message, 'Got it. I will call you ' + user.name + ' from now on.');
         });
     });
 });
@@ -251,13 +240,13 @@ controller.hears(['done (.*)', 'doing (.*)', 'todo (.*)'], 'direct_message,direc
         // TODO: Update item in storage
     }
 
-    bot.reply(message, 'Got it. We saved: ' + JSON.stringify(task));
+    bot.reply(message, 'Got it. We saved: \n```\n' + JSON.stringify(task) + '\n```');
 });
 
 controller.hears(['get', 'list'], 'direct_message,direct_mention,mention', function(bot, message) {
     // TODO: Replace this with getting from storage
     if (tasks) {
-        bot.reply(message, 'Your tasks are: ' + JSON.stringify(tasks));
+        bot.reply(message, 'Your tasks are: \n```\n' + JSON.stringify(tasks) + '\n```' );
     }else {
         bot.reply(message, 'No tasks ');
     }
@@ -296,6 +285,42 @@ controller.hears(['shutdown'], 'direct_message,direct_mention,mention', function
     });
 });
 
+controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', function(bot, message) {
+
+    bot.api.reactions.add({
+        timestamp: message.ts,
+        channel: message.channel,
+        name: 'robot_face',
+    }, function(err, res) {
+        if (err) {
+            bot.botkit.log('Failed to add emoji reaction :(', err);
+        }
+    });
+
+
+    controller.storage.users.get(message.user, function(err, user) {
+        if (user && user.name) {
+            bot.reply(message, 'Hello ' + user.name + '!!');
+        } else {
+            bot.reply(message, 'Hello.');
+        }
+    });
+});
+
+controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
+    var name = message.match[1];
+    controller.storage.users.get(message.user, function(err, user) {
+        if (!user) {
+            user = {
+                id: message.user,
+            };
+        }
+        user.name = name;
+        controller.storage.users.save(user, function(err, id) {
+            bot.reply(message, 'Got it. I will call you ' + user.name + ' from now on.');
+        });
+    });
+});
 
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'],
     'direct_message,direct_mention,mention', function(bot, message) {
