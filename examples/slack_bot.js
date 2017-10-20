@@ -91,7 +91,7 @@ controller.hears(['reminder'], 'direct_message,direct_mention', function(bot, me
             message = {type: 'message' , user: res.channel.user , channel: res.channel.id}
 
             bot.startConversation(message , function(err, convo) {
-                convo.ask('*Hello ' + users[el] +  ', it is 4PM ! Do you want to enter your tasks ?*'
+                convo.ask('*Hello ' + users[el] +  ', it is time for your report ! Do you want to enter your tasks ?*'
                     /* + '\nhttp://38.media.tumblr.com/d42f40555947c0b955ffbfc6f73fe8ce/tumblr_nwn2jnP3Pl1ucw7ggo1_400.gif' */ , [
                     {
                         pattern: 'yes',
