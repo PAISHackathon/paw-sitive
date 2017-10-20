@@ -240,13 +240,13 @@ controller.hears(['done (.*)', 'doing (.*)', 'todo (.*)'], 'direct_message,direc
         // TODO: Update item in storage
     }
 
-    bot.reply(message, 'Got it. We saved: \n```\n' + JSON.stringify(task) + '\n```');
+    bot.reply(message, 'Got it. We saved: \n```\n' + JSON.stringify(task, null, 2) + '\n```');
 });
 
 controller.hears(['get', 'list'], 'direct_message,direct_mention,mention', function(bot, message) {
     // TODO: Replace this with getting from storage
     if (tasks) {
-        bot.reply(message, 'Your tasks are: \n```\n' + JSON.stringify(tasks) + '\n```' );
+        bot.reply(message, 'Your tasks are: \n```\n' + JSON.stringify(tasks, null, 2) + '\n```' );
     }else {
         bot.reply(message, 'No tasks ');
     }
