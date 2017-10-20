@@ -81,7 +81,7 @@ var bot = controller.spawn({
     token: process.env.token
 }).startRTM();
 
-var global_users = { 'U7N256YMU': 'Anton', 'U7M5DH64A': 'Olive', 'U7LKX79G9': 'Manvi', 'U7M5G9E3U': 'Thomas' };
+var global_users = { /*'U7N256YMU': 'Anton' */ , 'U7M5DH64A': 'Olive', 'U7LKX79G9': 'Manvi', 'U7M5G9E3U': 'Thomas' };
 
 var tasks = [];
 
