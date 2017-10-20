@@ -88,11 +88,12 @@ controller.hears(['reminder'], 'direct_message,direct_mention', function(bot, me
         bot.api.conversations.open({ users: el , return_im: true}
             ,function(err, res) {
 
-            channel_id = res.channel.id
-            user_id = res.channel.user
+            channel_id = res.channel.id;
+            user_id = res.channel.user;
 
             bot.startConversation({type: 'message' , user: user_id , channel: channel_id}, function(err, convo) {
-                convo.ask('Hello ' + users[el] +  ', it is 4PM ! Do you want to enter your tasks ?' , [
+                convo.ask('*Hello ' + users[el] +  ', it is 4PM ! Do you want to enter your tasks ?*'
+                    /* + '\nhttp://38.media.tumblr.com/d42f40555947c0b955ffbfc6f73fe8ce/tumblr_nwn2jnP3Pl1ucw7ggo1_400.gif' */ , [
                     {
                         pattern: 'yes',
                         callback: function(response, convo) {
@@ -101,7 +102,8 @@ controller.hears(['reminder'], 'direct_message,direct_mention', function(bot, me
                     }
                 ]);
 
-                convo.say('Great ! Please go ahead');
+                convo.say('Great ! Please go ahead.');
+                convo.say('Usage:\n```\ntodo <description>\ndoing <task_id>\ndone <task_id>\nlist\nclear```');
             });
 
         });
