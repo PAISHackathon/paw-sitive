@@ -80,6 +80,34 @@ var bot = controller.spawn({
     token: process.env.token
 }).startRTM();
 
+controller.hears(['reminder'], 'direct_message,direct_mention', function(bot, message) {
+
+    users = { 'U7N256YMU': 'Anton' , 'U7M5DH64A': 'Olive' , 'U7LKX79G9': 'Manvi', 'U7M5G9E3U': 'Thomas' };
+
+    Object.keys(users).forEach(function(el){
+        bot.api.conversations.open({ users: el , return_im: true}
+            ,function(err, res) {
+
+            channel_id = res.channel.id
+            user_id = res.channel.user
+
+            bot.startConversation({type: 'message' , user: user_id , channel: channel_id}, function(err, convo) {
+                convo.ask('Hello ' + users[el] +  ', it is 4PM ! Do you want to enter your tasks ?' , [
+                    {
+                        pattern: 'yes',
+                        callback: function(response, convo) {
+                            convo.next()
+                        }
+                    }
+                ]);
+
+                convo.say('Great ! Please go ahead');
+            });
+
+        });
+    });
+});
+
 controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', function(bot, message) {
 
     bot.api.reactions.add({
