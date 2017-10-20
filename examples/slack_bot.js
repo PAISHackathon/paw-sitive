@@ -85,12 +85,12 @@ var global_users = { 'U7N256YMU': 'Anton', 'U7M5DH64A': 'Olive', 'U7LKX79G9': 'M
 
 var tasks = [];
 
-controller.hears(['^manager_report$'] , 'direct_message,direct_mention', function(bot, message) {
-    bot.api.conversations.open({ users: 'U7LKX79G9' , return_im: true}, function(err, res) {
+controller.hears(['^report$'] , 'direct_message,direct_mention', function(bot, message) {
+    bot.api.conversations.open({ users: 'U7N256YMU' , return_im: true}, function(err, res) {
         message = {type: 'message' , user: res.channel.user , channel: res.channel.id}
-        body = "Hey here is a summary of all the tasks per user:\n"
+        body = "Hey here is a summary of the tasks:\n"
         tasks.forEach(function(task){
-            body += task.task.id + ' "' + task.task.description + '" assigned to '+ ( global_users[task.user.id] || task.user.id) + "\n"
+            body += task.status + ' "' + task.task.description + '" assigned to '+ ( global_users[task.user.id] || task.user.id) + "\n"
         });
         bot.reply(message, { text: body });
     });
