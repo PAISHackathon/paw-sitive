@@ -114,32 +114,32 @@ controller.hears(['^reminder$'], 'direct_message,direct_mention', function(bot, 
 
             bot.startConversation(message, function (err, convo) {
                 convo.ask('*Hello ' + global_users[el] +  ', it is time for your report ! Do you want to enter your tasks ?*'
-                    , [
-                    {
-                        pattern: 'yes',
-                        callback: function(response, convo) {
-                            convo.next()
-                        }
-                    },
-                    {
-                        pattern: 'no',
-                        callback: function(response, convo) {
-                            convo.stop()
-                        }
-                    },
-                    {
-                        pattern: 'snooze',
-                        callback: function(response, convo) {
-                            convo.stop()
-                        }
-                    },
-                    {
-                        default: true,
-                        callback: function(response, convo) {
-                            convo.repeat();
-                            convo.next();
-                        }
-                    }])
+                , [
+                {
+                    pattern: 'yes',
+                    callback: function(response, convo) {
+                        convo.next()
+                    }
+                },
+                {
+                    pattern: 'no',
+                    callback: function(response, convo) {
+                        convo.stop()
+                    }
+                },
+                {
+                    pattern: 'snooze',
+                    callback: function(response, convo) {
+                        convo.stop()
+                    }
+                },
+                {
+                    default: true,
+                    callback: function(response, convo) {
+                        convo.repeat();
+                        convo.next();
+                    }
+                }]);
 
                 convo.on('end', function(convo) {
                     if (convo.status == 'completed') {
@@ -151,7 +151,6 @@ controller.hears(['^reminder$'], 'direct_message,direct_mention', function(bot, 
                     }
                 });
             });
-
         });
     });
 });
