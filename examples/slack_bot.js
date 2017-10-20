@@ -344,8 +344,8 @@ controller.hears(['coffee'], 'direct_message,direct_mention,mention' , function(
     });
 });
 
-controller.hears(['^spaghetti$'], function(bot, message) {
-	bot.whisper(message, {as_user: false, text: 'I may be a humble App, but I too love a good noodle'});
+controller.hears( ['^spaghetti$'] , 'direct_message,direct_mention,mention', function(bot, message) {
+	bot.whisper(message, 'I may be a humble App, but I too love a good noodle');
 });
 
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'],
