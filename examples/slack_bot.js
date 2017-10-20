@@ -97,55 +97,61 @@ controller.hears(['^manager_report$'] , 'direct_message,direct_mention', functio
 });
 
 controller.hears(['^reminder$'], 'direct_message,direct_mention', function(bot, message) {
-
     Object.keys(global_users).forEach(function (el) {
         bot.api.conversations.open({ users: el, return_im: true }
-            , function (err, res) {
+        , function (err, res) {
 
-                message = { type: 'message', user: res.channel.user, channel: res.channel.id }
+            message = { type: 'message', user: res.channel.user, channel: res.channel.id }
 
-                bot.reply(message, {
-                    "attachments": [
-                        {
-                            "fallback": "Pleading kitten",
-                            "image_url": "http://38.media.tumblr.com/d42f40555947c0b955ffbfc6f73fe8ce/tumblr_nwn2jnP3Pl1ucw7ggo1_400.gif"
-                        }
-                    ]
-                });
-
-                bot.startConversation(message, function (err, convo) {
-
-                convo.ask('*Hello ' + global_users[el] +  ', it is time for your report ! Do you want to enter your tasks ?*'
-                    , [
+            bot.reply(message, {
+                "attachments": [
                     {
-                        pattern: 'yes',
-                        callback: function(response, convo) {
-                            convo.next()
-                        }
-                    },
-                    {
-                        pattern: 'no',
-                        callback: function(response, convo) {
-                            convo.stop()
-                        }
-                    },
-                    {
-                        pattern: 'snooze',
-                        callback: function(response, convo) {
-                            convo.stop()
-                        }
-                    },
-                    {
-                        default: true,
-                        callback: function(response, convo) {
-                            convo.repeat();
-                            convo.next();
-                        }
-                    }])
-
-                });
-
+                        "fallback": "Pleading kitten",
+                        "image_url": "http://38.media.tumblr.com/d42f40555947c0b955ffbfc6f73fe8ce/tumblr_nwn2jnP3Pl1ucw7ggo1_400.gif"
+                    }
+                ]
             });
+
+            bot.startConversation(message, function (err, convo) {
+                convo.ask('*Hello ' + global_users[el] +  ', it is time for your report ! Do you want to enter your tasks ?*'
+                , [
+                {
+                    pattern: 'yes',
+                    callback: function(response, convo) {
+                        convo.next()
+                    }
+                },
+                {
+                    pattern: 'no',
+                    callback: function(response, convo) {
+                        convo.stop()
+                    }
+                },
+                {
+                    pattern: 'snooze',
+                    callback: function(response, convo) {
+                        convo.stop()
+                    }
+                },
+                {
+                    default: true,
+                    callback: function(response, convo) {
+                        convo.repeat();
+                        convo.next();
+                    }
+                }]);
+
+                convo.on('end', function(convo) {
+                    if (convo.status == 'completed') {
+                        bot.reply(message, 'Great ! Please go ahead.');
+                        bot.reply(message, 'Usage:\n```\ntodo <description>\ndoing <task_id>\ndone <task_id>\nlist\nclear```')
+                    } else {
+                        // this happens if the conversation ended prematurely for some reason
+                        bot.reply(message, 'OK, i\'ll remind you later!');
+                    }
+                });
+            });
+        });
     });
 });
 
