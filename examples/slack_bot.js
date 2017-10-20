@@ -80,11 +80,11 @@ var bot = controller.spawn({
     token: process.env.token
 }).startRTM();
 
+var global_users = { 'U7N256YMU': 'Anton' , 'U7M5DH64A': 'Olive' , 'U7LKX79G9': 'Manvi', 'U7M5G9E3U': 'Thomas' } ;
+
 controller.hears(['reminder'], 'direct_message,direct_mention', function(bot, message) {
 
-    users = { 'U7N256YMU': 'Anton' , 'U7M5DH64A': 'Olive' , 'U7LKX79G9': 'Manvi', 'U7M5G9E3U': 'Thomas' };
-
-    Object.keys(users).forEach(function(el){
+    Object.keys(global_users).forEach(function(el){
         bot.api.conversations.open({ users: el , return_im: true}
             ,function(err, res) {
 
