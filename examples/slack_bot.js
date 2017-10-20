@@ -97,24 +97,22 @@ controller.hears(['^manager_report$'] , 'direct_message,direct_mention', functio
 });
 
 controller.hears(['^reminder$'], 'direct_message,direct_mention', function(bot, message) {
-
     Object.keys(global_users).forEach(function (el) {
         bot.api.conversations.open({ users: el, return_im: true }
-            , function (err, res) {
+        , function (err, res) {
 
-                message = { type: 'message', user: res.channel.user, channel: res.channel.id }
+            message = { type: 'message', user: res.channel.user, channel: res.channel.id }
 
-                bot.reply(message, {
-                    "attachments": [
-                        {
-                            "fallback": "Pleading kitten",
-                            "image_url": "http://38.media.tumblr.com/d42f40555947c0b955ffbfc6f73fe8ce/tumblr_nwn2jnP3Pl1ucw7ggo1_400.gif"
-                        }
-                    ]
-                });
+            bot.reply(message, {
+                "attachments": [
+                    {
+                        "fallback": "Pleading kitten",
+                        "image_url": "http://38.media.tumblr.com/d42f40555947c0b955ffbfc6f73fe8ce/tumblr_nwn2jnP3Pl1ucw7ggo1_400.gif"
+                    }
+                ]
+            });
 
-                bot.startConversation(message, function (err, convo) {
-
+            bot.startConversation(message, function (err, convo) {
                 convo.ask('*Hello ' + global_users[el] +  ', it is time for your report ! Do you want to enter your tasks ?*'
                     , [
                     {
@@ -143,8 +141,6 @@ controller.hears(['^reminder$'], 'direct_message,direct_mention', function(bot, 
                         }
                     }])
 
-                });
-
                 convo.on('end', function(convo) {
                     if (convo.status == 'completed') {
                         bot.reply(message, 'Great ! Please go ahead.');
@@ -154,8 +150,9 @@ controller.hears(['^reminder$'], 'direct_message,direct_mention', function(bot, 
                         bot.reply(message, 'OK, i\'ll remind you later!');
                     }
                 });
-
             });
+
+        });
     });
 });
 
