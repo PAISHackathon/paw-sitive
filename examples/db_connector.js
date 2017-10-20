@@ -38,10 +38,11 @@ var prepareWorker = function(db){
                 console.log('document is inserted');
             });
         },
-        findByDate: function(date, userId){
+        findByDate: function(date, userId, callback){
             collection.find({date: date.setHours(0,0,0,0), 'user.id': userId}).toArray(function(err, result) {
                 if (err) throw err;
                 console.log(result);
+                callback(result);
               });
         },
         findByDateRange: function(startDate, endDate, userId){

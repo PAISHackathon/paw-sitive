@@ -102,44 +102,33 @@ controller.hears(['reminder'], 'direct_message,direct_mention', function (bot, m
 
                 bot.startConversation(message, function (err, convo) {
 
-                    convo.ask('*Hello ' + users[el] + ', it is time for your report ! Do you want to enter your tasks ?*'
-                        , [
-                            {
-                                pattern: 'yes',
-                                callback: function (response, convo) {
-                                    convo.next()
-                                }
-                            },
-                            {
-                                pattern: 'no',
-                                callback: function (response, convo) {
-                                    convo.stop()
-                                }
-                            },
-                            {
-                                pattern: 'snooze',
-                                callback: function (response, convo) {
-                                    convo.stop()
-                                }
-                            },
-                            {
-                                default: true,
-                                callback: function (response, convo) {
-                                    convo.repeat();
-                                    convo.next();
-                                }
-                            }
-                        ]);
-
-                    convo.on('end', function (convo) {
-                        if (convo.status == 'completed') {
-                            bot.reply(message, 'Great ! Please go ahead.');
-                            bot.reply(message, 'Usage:\n```\ntodo <description>\ndoing <task_id>\ndone <task_id>\nlist\nclear```')
-                        } else {
-                            // this happens if the conversation ended prematurely for some reason
-                            bot.reply(message, 'OK, i\'ll remind you later!');
+                convo.ask('*Hello ' + global_users[el] +  ', it is time for your report ! Do you want to enter your tasks ?*'
+                    , [
+                    {
+                        pattern: 'yes',
+                        callback: function(response, convo) {
+                            convo.next()
                         }
-                    });
+                    },
+                    {
+                        pattern: 'no',
+                        callback: function(response, convo) {
+                            convo.stop()
+                        }
+                    },
+                    {
+                        pattern: 'snooze',
+                        callback: function(response, convo) {
+                            convo.stop()
+                        }
+                    },
+                    {
+                        default: true,
+                        callback: function(response, convo) {
+                            convo.repeat();
+                            convo.next();
+                        }
+                    }])
 
                 });
 
@@ -275,15 +264,19 @@ controller.hears(['done (.*)', 'finished (.*)', 'pending (.*)', 'ongoing (.*)',
 controller.hears(['get', 'list'], 'direct_message,direct_mention,mention', function (bot, message) {
     // TODO: Replace this with getting from storage
     dbConnector('mongodb://localhost:27017/slackdb', function(worker){
-        var storedTasks = worker.findByDate(new Date(), message.user);
-        console.log("STORED: " + storedTasks);
-        if (storedTasks) {
-            bot.reply(message, 'Your tasks are: \n```\n' + JSON.stringify(storedTasks, null, 2) + '\n```');
-        } else {
-            bot.reply(message, 'No tasks ');
-        }
+        worker.findByDate(new Date(), message.user, function(result){
+            if (result) {
+                bot.reply(message, 'Your tasks are: \n```\n' + JSON.stringify(result, null, 2) + '\n```');
+            } else {
+                bot.reply(message, 'No tasks ');
+            }
+        });
     });
 });
+
+function formatReport(tasks){
+    // FORMATS THE REPORT BASED ON STATUS
+}
 
 controller.hears(['clear'], 'direct_message,direct_mention,mention', function (bot, message) {
     // TODO: Replace this with clearing the storage
@@ -355,25 +348,20 @@ controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_men
     });
 });
 
-controller.hears(['coffee'], function (bot, message) {
-    bot.startConversation({
-        user: U7LKX79G9,
-        channel: U7LKX79G9,
-        text: 'How are you feeling today?'
-    }, function (err, convo) {
-        convo.ask({
-            channel: U7LKX79G9,
-            text: 'How are you feeling today?'
-        }, function (res, convo) {
-            convo.say(res.text + ' pawsome!')
-            convo.next()
-        }
-        );
+controller.hears(['coffee'], 'direct_message,direct_mention,mention' , function(bot, message) {
+    bot.startConversation(
+        message
+        , function(err, convo) {
+            convo.ask( 'How are you feeling today?'
+                , function(res, convo) {
+                convo.say(res.text + ' pawsome!')
+                convo.next()
+            });
     });
 });
 
-controller.hears(['^spaghetti$'], function (bot, message) {
-    bot.whisper(message, { as_user: false, text: 'I may be a humble App, but I too love a good noodle' });
+controller.hears( ['^spaghetti$'] , 'direct_message,direct_mention,mention', function(bot, message) {
+	bot.whisper(message, 'I may be a humble App, but I too love a good noodle');
 });
 
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'],
