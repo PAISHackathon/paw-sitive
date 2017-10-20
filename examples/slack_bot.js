@@ -143,7 +143,7 @@ controller.hears(['^reminder$'], 'direct_message,direct_mention', function(bot, 
                 convo.on('end', function(convo) {
                     if (convo.status == 'completed') {
                         bot.reply({type: 'message', user: res.channel.user, channel: res.channel.id}, 'Great ! Please go ahead.');
-                        bot.reply({type: 'message', user: res.channel.user, channel: res.channel.id}, 'Usage:\n```\ntodo <description>\ndoing <task_id>\ndone <task_id>\nlist\nclear```')
+                        bot.reply({type: 'message', user: res.channel.user, channel: res.channel.id}, 'Usage:\n```\ntodo <task>\ndoing <task>\ndone <task>\nlist```')
                     } else {
                         // this happens if the conversation ended prematurely for some reason
                         bot.reply({type: 'message', user: res.channel.user, channel: res.channel.id}, 'OK, i\'ll remind you later!');
