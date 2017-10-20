@@ -101,7 +101,7 @@ controller.hears(['reminder'], 'direct_message,direct_mention', function(bot, me
 
             bot.startConversation(message , function(err, convo) {
 
-                convo.ask('*Hello ' + users[el] +  ', it is time for your report ! Do you want to enter your tasks ?*'
+                convo.ask('*Hello ' + global_users[el] +  ', it is time for your report ! Do you want to enter your tasks ?*'
                     , [
                     {
                         pattern: 'yes',
