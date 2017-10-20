@@ -82,7 +82,20 @@ var bot = controller.spawn({
 
 var global_users = { 'U7N256YMU': 'Anton' , 'U7M5DH64A': 'Olive' , 'U7LKX79G9': 'Manvi', 'U7M5G9E3U': 'Thomas' } ;
 
-controller.hears(['reminder'], 'direct_message,direct_mention', function(bot, message) {
+var tasks = [];
+
+controller.hears(['^manager_report$'] , 'direct_message,direct_mention', function(bot, message) {
+    bot.api.conversations.open({ users: 'U7LKX79G9' , return_im: true}, function(err, res) {
+        message = {type: 'message' , user: res.channel.user , channel: res.channel.id}
+        body = "Hey here is a summary of all the tasks per user:\n"
+        tasks.forEach(function(task){
+            body += task.id + ' "' + task.description + '" assigned to '+ ( global_users[task.user] || task.user) + "\n"
+        });
+        bot.reply(message, { text: body });
+    });
+});
+
+controller.hears(['^reminder$'], 'direct_message,direct_mention', function(bot, message) {
 
     Object.keys(global_users).forEach(function(el){
         bot.api.conversations.open({ users: el , return_im: true}
@@ -214,8 +227,6 @@ controller.hears(['what is my name', 'who am i'], 'direct_message,direct_mention
     });
 });
 
-var tasks = [];
-
 // Save/Update task to storage
 controller.hears(['done (.*)', 'doing (.*)', 'todo (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
     var key = message.match[1];
@@ -262,13 +273,13 @@ controller.hears(['get', 'list'], 'direct_message,direct_mention,mention', funct
     }
 });
 
-controller.hears(['clear'], 'direct_message,direct_mention,mention', function(bot, message) {
+controller.hears(['^clear$'], 'direct_message,direct_mention,mention', function(bot, message) {
     // TODO: Replace this with clearing the storage
     tasks = [];
     bot.reply(message, 'Tasks are cleared.');
 });
 
-controller.hears(['shutdown'], 'direct_message,direct_mention,mention', function(bot, message) {
+controller.hears(['^shutdown$'], 'direct_message,direct_mention,mention', function(bot, message) {
 
     bot.startConversation(message, function(err, convo) {
 
@@ -332,7 +343,7 @@ controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_men
     });
 });
 
-controller.hears(['coffee'], 'direct_message,direct_mention,mention' , function(bot, message) {
+controller.hears(['^coffee$'], 'direct_message,direct_mention,mention' , function(bot, message) {
     bot.startConversation(
         message
         , function(err, convo) {
