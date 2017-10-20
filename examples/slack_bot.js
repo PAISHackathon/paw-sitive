@@ -111,6 +111,7 @@ controller.hears(['^reminder$'], 'direct_message,direct_mention', function(bot, 
             });
 
             bot.startConversation({type: 'message', user: res.channel.user, channel: res.channel.id}, function (err, convo) {
+                convo.task.timeLimit = 3000
                 convo.ask('*Hello ' + global_users[el] +  ', it is time for your report ! Do you want to enter your tasks ?*'
                 , [
                 {
