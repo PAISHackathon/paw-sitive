@@ -185,6 +185,59 @@ controller.hears(['what is my name', 'who am i'], 'direct_message,direct_mention
     });
 });
 
+var tasks = [];
+
+// Save/Update task to storage
+controller.hears(['done (.*)', 'doing (.*)', 'todo (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
+    var key = message.match[1];
+    var task = {};
+
+    // Check if task is in storage
+    var oldTask = tasks.filter(p => (p.id == key || p.description == key));
+
+    if(oldTask.length == 0) {
+        // If it doesnt exist
+        // Generate  5-char random string ID
+        task.id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5).toUpperCase();
+        
+        // Save the new task details
+        task.description = message.match[1];
+        task.user = message.user;     
+    } else {
+        task = oldTask[0];
+    }
+
+    // Update date and status part
+    task.date = message.ts;
+
+    // Status is the first word of the sentence
+    task.status = message.text.substring(0, message.text.indexOf(' '));
+
+    // Only save to storage if it is new
+    if(oldTask.length == 0) {
+        // TODO: Replace this with save to storage
+        tasks.push(task);
+    } else {
+        // TODO: Update item in storage
+    }
+
+    bot.reply(message, 'Got it. We saved: ' + JSON.stringify(task));
+});
+
+controller.hears(['get', 'list'], 'direct_message,direct_mention,mention', function(bot, message) {
+    // TODO: Replace this with getting from storage
+    if (tasks) {
+        bot.reply(message, 'Your tasks are: ' + JSON.stringify(tasks));
+    }else {
+        bot.reply(message, 'No tasks ');
+    }
+});
+
+controller.hears(['clear'], 'direct_message,direct_mention,mention', function(bot, message) {
+    // TODO: Replace this with clearing the storage
+    tasks = [];
+    bot.reply(message, 'Tasks are cleared.');
+});
 
 controller.hears(['shutdown'], 'direct_message,direct_mention,mention', function(bot, message) {
 
