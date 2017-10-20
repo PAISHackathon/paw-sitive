@@ -145,6 +145,16 @@ controller.hears(['^reminder$'], 'direct_message,direct_mention', function(bot, 
 
                 });
 
+                convo.on('end', function(convo) {
+                    if (convo.status == 'completed') {
+                        bot.reply(message, 'Great ! Please go ahead.');
+                        bot.reply(message, 'Usage:\n```\ntodo <description>\ndoing <task_id>\ndone <task_id>\nlist\nclear```')
+                    } else {
+                        // this happens if the conversation ended prematurely for some reason
+                        bot.reply(message, 'OK, i\'ll remind you later!');
+                    }
+                });
+
             });
     });
 });
