@@ -332,21 +332,16 @@ controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_men
     });
 });
 
-  controller.hears(['coffee'], function(bot, message) {
-    bot.startConversation({
-    user: U7LKX79G9,
-    channel: U7LKX79G9,
-    text: 'How are you feeling today?'
-    }, function(err, convo) {
-        convo.ask({
-        channel: U7LKX79G9,
-        text: 'How are you feeling today?'
-        }, function(res, convo) {
-        convo.say(res.text + ' pawsome!')
-        convo.next()
-    }
-);
-});
+controller.hears(['coffee'], 'direct_message,direct_mention,mention' , function(bot, message) {
+    bot.startConversation(
+        message
+        , function(err, convo) {
+            convo.ask( 'How are you feeling today?'
+                , function(res, convo) {
+                convo.say(res.text + ' pawsome!')
+                convo.next()
+            });
+    });
 });
 
 controller.hears(['^spaghetti$'], function(bot, message) {
