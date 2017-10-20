@@ -90,7 +90,7 @@ controller.hears(['^manager_report$'] , 'direct_message,direct_mention', functio
         message = {type: 'message' , user: res.channel.user , channel: res.channel.id}
         body = "Hey here is a summary of all the tasks per user:\n"
         tasks.forEach(function(task){
-            body += task.id + ' "' + task.description + '" assigned to '+ ( global_users[task.user] || task.user) + "\n"
+            body += task.task.id + ' "' + task.task.description + '" assigned to '+ ( global_users[task.user.id] || task.user.id) + "\n"
         });
         bot.reply(message, { text: body });
     });
@@ -240,7 +240,7 @@ controller.hears(['done (.*)', 'finished (.*)', 'pending (.*)', 'ongoing (.*)',
     var task = {};
 
     // Check if task is in storage
-    var oldTask = tasks.filter(p => (p.id == key || p.description == key));
+    var oldTask = tasks.filter(p => (p.task.id == key || p.task.description == key));
 
     if (oldTask.length == 0) {
         // If it doesnt exist
@@ -271,19 +271,31 @@ controller.hears(['done (.*)', 'finished (.*)', 'pending (.*)', 'ongoing (.*)',
     } else {
         // TODO: Update item in storage
         dbConnector('mongodb://localhost:27017/slackdb', function(worker){
-            worker.updateStatus(task.id, task.status);
+            console.log(oldTask);
+            worker.updateStatus(oldTask[0].task.id, task.status);
         });
     }
 
     bot.reply(message, 'Got it. We saved: \n```\n' + JSON.stringify(task, null, 2) + '\n```');
 });
 
-controller.hears(['get', 'list'], 'direct_message,direct_mention,mention', function (bot, message) {
+controller.hears(['start', 'get', 'list'], 'direct_message,direct_mention,mention', function (bot, message) {
     // TODO: Replace this with getting from storage
     dbConnector('mongodb://localhost:27017/slackdb', function(worker){
-        worker.findByDate(new Date(), message.user, function(result){
-            if (result) {
-                bot.reply(message, 'Your tasks are: \n```\n' + JSON.stringify(result, null, 2) + '\n```');
+        worker.findByDate(new Date(), message.user, function(data){
+            if (data) {
+                tasks = data;
+                var str = '';
+                var result = groupBy(data, 'status');
+                Object.keys(result).forEach(function(key){
+                    str += key;
+                  str += '\n';
+                  result[key].forEach(function(item){
+                      str += '\t' + item.task.description + '\n';
+                  });
+                });
+                console.log(str);
+                bot.reply(message, 'Your tasks are: \n```\n' + str + '\n```');
             } else {
                 bot.reply(message, 'No tasks ');
             }
@@ -291,8 +303,21 @@ controller.hears(['get', 'list'], 'direct_message,direct_mention,mention', funct
     });
 });
 
+var groupBy = function(xs, key) {
+    return xs.reduce(function(rv, x) {
+      (rv[x[key]] = rv[x[key]] || []).push(x);
+      return rv;
+    }, {});
+  };
+
 function formatReport(tasks){
     // FORMATS THE REPORT BASED ON STATUS
+    var body = "Hey here is a summary of all the tasks per user:\n"
+    tasks.forEach(function(task){
+        body += task.status + ' "' + task.task.description + '" assigned to '+ ( global_users[task.user.id] || task.user.id) + "\n"
+    });
+
+    return body;
 }
 
 controller.hears(['clear'], 'direct_message,direct_mention,mention', function (bot, message) {
